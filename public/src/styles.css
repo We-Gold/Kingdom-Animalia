@@ -1,0 +1,27 @@
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.tabNav {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    text-align: center;
+}
+
+.fas {
+    font-size: 1.6em;
+}
+
+.fabtn {
+    color: #607D37;
+}
+
+.fabtn:hover{
+    cursor: pointer;
+}

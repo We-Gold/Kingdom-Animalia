@@ -5,11 +5,11 @@ self.addEventListener('install',function(e) {
         cache.addAll([
             '/',
             '/index.html',
-            '/src/lib/bootstrap.min.css',
+            'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css',
             '/src/styles.css',
             '/src/lib/jquery-3.3.1.min.js',
             '/src/main.js',
-            'https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css',
+            'https://use.fontawesome.com/releases/v5.0.13/css/all.css',
         ]);
     }));
 }); 
