@@ -52,3 +52,38 @@ body{
 #signupForm {
     display: none;
 }
+
+#home {
+    display: none;
+}
+
+#camera {
+    display: none;
+}
+
+#search {
+    display: none;
+}
+
+#community {
+    display: none;
+}
+
+#profile {
+    display: none;
+}
+
+#tabNav {
+    display: none;
+}
+
+.full-img {
+    border-radius: 5px;
+    width: 90%;
+}
+
+#loginNotification {
+    display: none;
+    padding: 10px;
+    border-radius: 0;
+}

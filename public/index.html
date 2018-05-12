@@ -13,27 +13,29 @@
 </head>
     <body>
         <div id="login">
+            <div class="notification is-danger" id="loginNotification">
+                <span id="loginNotificationText"></span>
+            </div>
             <div class="container is-fluid">
                 <article id="loginForm" class="message is-success mt">
                     <div class="message-header">
                       <p>Login</p>
                     </div>
                     <div class="message-body">
-                        <form id="loginResForm">
-                            <div class="field">
-                                <label class="label">Email</label>
-                                <div class="control">
-                                    <input type="email" name="email" class="input" placeholder="Enter Email">
-                                </div>
+                        <img class="full-img" src="src/img/cover.jpg">
+                        <div class="field">
+                            <label class="label">Email</label>
+                            <div class="control">
+                                <input type="email" id="loginEmail" class="input" placeholder="Enter Email">
                             </div>
-                            <div class="field">
-                                <label class="label">Password</label>
-                                <div class="control">
-                                    <input type="password" name="pass" class="input" placeholder="Enter Password">
-                                </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Password</label>
+                            <div class="control">
+                                <input type="password" id="loginPass" class="input" placeholder="Enter Password">
                             </div>
-                            <button class="button is-info mt" type="submit">Login</button>
-                        </form>
+                        </div>
+                        <button id="loginResForm" class="button is-info mt">Login</button>
                     </div>
                 </article>
                 <article id="signupForm" class="message is-success mt">
@@ -41,24 +43,23 @@
                           <p>Sign Up</p>
                         </div>
                         <div class="message-body">
-                            <form id="signupResForm">
-                                <div class="field">
-                                    <label class="label">Email</label>
-                                    <div class="control">
-                                        <input type="email" name="email" class="input" placeholder="Enter Email">
-                                    </div>
+                            <img class="full-img" src="src/img/cover.jpg">
+                            <div class="field">
+                                <label class="label">Email</label>
+                                <div class="control">
+                                    <input type="email" id="signupEmail" class="input" placeholder="Enter Email">
                                 </div>
-                                <div class="field">
-                                    <label class="label">Password</label>
-                                    <div class="control">
-                                        <input type="password" name="pass" class="input" placeholder="Enter Password">
-                                    </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Password</label>
+                                <div class="control">
+                                    <input type="password" id="signupPass" class="input" placeholder="Enter Password">
                                 </div>
-                                <button class="button is-info mt" type="submit">Sign Up</button>
-                            </form>
+                            </div>
+                            <button id="signupResForm" class="button is-info mt">Sign Up</button>
                         </div>
                     </article>
-                <a id="toggleAuth" class="button">Sign Up Instead!</a>
+                <a id="toggleAuth" class="button">No Account? Sign Up</a>
             </div>
         </div>
         <div id="home">
@@ -98,7 +99,27 @@
                 <h1 class="is-3">Profile</h1>
             </div>
             <div class="container is-fluid">
-                Ea et non ullamco excepteur in.
+                <div class="card mt">
+                    <div class="card-image">
+                        </div>
+                        <div class="card-content">
+                            <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-48x48">
+                                    <img id="userIcon" src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4" id="userName">John Doe</p>
+                                <p class="subtitle is-6" id="userRank">Amateur</p>
+                            </div>
+                            </div>
+                        
+                            <div class="content">
+                            
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
 

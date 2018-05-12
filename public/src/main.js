@@ -86,10 +86,43 @@ function navigate(el) {
 $('#toggleAuth').click(()=>{
     $('#loginForm').toggle();
     $('#signupForm').toggle();
-    if($('#toggleAuth').text()=="Sign Up Instead!") {
-        $('#toggleAuth').text("Login Instead!");
+    if($('#toggleAuth').text()=="No Account? Sign Up") {
+        $('#toggleAuth').text("Have An Account? Login");
     } else {
-        $('#toggleAuth').text("Sign Up Instead!");
+        $('#toggleAuth').text("No Account? Sign Up");
     }
 });
 
+$('#loginResForm').click(()=>{
+    let email = $('#loginEmail')[0].value;
+    let pass = $('#loginPass')[0].value;
+    login(email,pass);
+});
+
+$('#signupResForm').click(()=>{
+    let email = $('#signupEmail')[0].value;
+    let pass = $('#signupPass')[0].value;
+    login(email,pass);
+});
+
+function login(email,pass) {
+    firebase.auth().signInWithEmailAndPassword(email, pass).catch(function(error) {
+        let errorMessage = error.message;
+        $('#loginNotification').show();
+        $('#loginNotificationText').text(errorMessage);
+        setTimeout(()=>{
+            $('#loginNotification').fadeOut(500);
+        },3000);
+    });
+}
+
+function signup(email,pass) {
+    firebase.auth().createUserWithEmailAndPassword(email, pass).catch(function(error) {
+        let errorMessage = error.message;
+        $('#loginNotification').show();
+        $('#loginNotificationText').text(errorMessage);
+        setTimeout(()=>{
+            $('#loginNotification').fadeOut(500);
+        },3000);
+    });
+}

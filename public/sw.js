@@ -10,7 +10,6 @@ self.addEventListener('install',function(e) {
             '/src/lib/jquery-3.3.1.min.js',
             '/src/main.js',
             'https://use.fontawesome.com/releases/v5.0.13/css/all.css',
-            'https://www.gstatic.com/firebasejs/5.0.2/firebase.js'
         ]);
     }));
 }); 
