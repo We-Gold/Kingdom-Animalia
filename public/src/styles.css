@@ -44,3 +44,11 @@ body{
     margin-left: 20px;
     margin-right: 20px;
 }
+
+.mt {
+    margin-top: 15px;
+}
+
+#signupForm {
+    display: none;
+}
