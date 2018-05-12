@@ -25,3 +25,22 @@
 .fabtn:hover{
     cursor: pointer;
 }
+
+.head {
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    background: #375A28;
+}
+
+body{
+    margin: 0;
+}
+
+.is-fluid {
+    margin-left: 20px;
+    margin-right: 20px;
+}
