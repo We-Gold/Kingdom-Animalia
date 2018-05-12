@@ -25,7 +25,7 @@ self.addEventListener('fetch',(e)=>{
             if(res) {
                 return res;
             } else {
-                return fetch(e.request)
+                return fetch(e.request);
             }
         })
     );

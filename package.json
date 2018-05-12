@@ -7,12 +7,11 @@
         "start": "http-server -c-1 -p 8081"
     },
     "keywords": [
-      "animal"
+        "animal"
     ],
     "author": "WeGo",
     "license": "MIT",
     "devDependencies": {
         "http-server": "^0.10.0"
     }
-  }
-  
+}
