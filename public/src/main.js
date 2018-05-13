@@ -148,6 +148,7 @@ function toggleFooter() {
 }
 
 function navigate(el) {
+    stopVideo()
     if (el.id=="homeBtn") {
         $('#home').show();
         $('#camera').hide();
@@ -161,6 +162,7 @@ function navigate(el) {
         $('#search').hide();
         $('#community').hide();
         $('#profile').hide();
+        initMedia();
     }
     else if (el.id=="searchBtn") {
         $('#home').hide();
@@ -288,3 +290,71 @@ $('#actGeo').click(()=>{
     }
     navigator.geolocation.getCurrentPosition(geoSuccess,geoErr);
 });
+
+function initMedia() {
+    if (!('mediaDevices' in navigator)) {
+        navigator.mediaDevices = {};
+    }
+    if (!('getUserMedia' in navigator.mediaDevices)) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+            let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            if (!getUserMedia) {
+                return Promise.reject(new Error('getUserMedia is not implemented!'));
+            }
+
+            return new Promise(function(resolve, reject) {
+                getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+        }
+    }
+
+    navigator.mediaDevices.getUserMedia({video: {width: { min: 1280 },height: { min: 720 }}})
+    .then(function(stream) {
+        $('#mediaStream').show();
+        $('#frameCanvas').hide();
+        $('#takePhoto').show();
+
+        let vidPlayer = document.getElementById('mediaStream');
+        vidPlayer.srcObject = stream;
+    })
+    .catch(function(err) {
+        $('#mediaAccess').hide();
+        $('#noAccess').show();
+    });
+}
+
+$('#takePhoto').click(()=>{
+    $('#frameCanvas').show();
+    $('#mediaStream').hide();
+    $('#takePhoto').hide();
+    let ctx = document.getElementById('frameCanvas').getContext('2d');
+    let vid = document.getElementById('mediaStream');
+    let canvas = document.getElementById('frameCanvas');
+    ctx.drawImage(vid,0,0,canvas.width, vid.videoHeight/(vid.videoWidth/canvas.width));
+    vid.srcObject.getVideoTracks().forEach(function(track) {
+        track.stop();
+    });
+});
+
+function stopVideo() {
+    let vid = document.getElementById('mediaStream');
+    if(!(vid.srcObject)) {
+        return;
+    }
+    vid.srcObject.getVideoTracks().forEach(function(track) {
+        track.stop();
+    });
+}
+
+function dataURItoBlob(dataURI) {
+    var byteString = atob(dataURI.split(',')[1]);
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    var blob = new Blob([ab], {type: mimeString});
+    return blob;
+}

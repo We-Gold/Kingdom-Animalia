@@ -113,5 +113,29 @@ body{
 }
 
 #pMap {
-    height: 180px; 
+    height: 180px;
+}
+
+#noAccess {
+    display: none;
+}
+
+#frameCanvas {
+    display: none;
+    max-width: 100%;
+}
+
+.file-margin {
+    margin-left: 30px;
+    margin-top: 20px;
+}
+
+#mediaAccess {
+    text-align: center;
+}
+
+#takePhoto {
+    font-size: 90px;
+    margin-top: 40px;
+    color: #90AD56;
 }

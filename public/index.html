@@ -80,8 +80,27 @@
             <div class="head">
                 <h1 class="is-3">Camera</h1>
             </div>            
-            <div class="container is-fluid">
-                Ea et non ullamco excepteur in.
+            <div class="container">
+                <div id="mediaAccess">
+                    <video id="mediaStream" autoplay></video>
+                    <canvas id="frameCanvas"></canvas>
+                    <span id="takePhoto" class="fas fa-camera"></span>
+                </div>
+                <div id="noAccess">
+                    <div class="file file-margin">
+                        <label class="file-label">
+                            <input class="file-input" type="file" id="imagePick" accept="image/*">
+                            <span class="file-cta">
+                            <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                                Choose an image…
+                            </span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="search">
