@@ -111,3 +111,7 @@ body{
 #blockedGeo {
     display: none;
 }
+
+#pMap {
+    height: 180px; 
+}
