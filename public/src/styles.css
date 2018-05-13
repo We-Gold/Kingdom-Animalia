@@ -87,3 +87,27 @@ body{
     padding: 10px;
     border-radius: 0;
 }
+
+#profileEdit {
+    display: none;
+}
+
+#profile {
+    overflow-y: scroll;
+}
+
+#tabNav {
+    z-index: 10;
+}
+.buff {
+    height: 100px;
+}
+#noGeo {
+    display: none;
+}
+#profMap {
+    display: none;
+}
+#blockedGeo {
+    display: none;
+}

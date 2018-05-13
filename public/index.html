@@ -99,27 +99,81 @@
                 <h1 class="is-3">Profile</h1>
             </div>
             <div class="container is-fluid">
-                <div class="card mt">
+                <div class="card mt" id="profileInfo">
                     <div class="card-image">
-                        </div>
-                        <div class="card-content">
-                            <div class="media">
+                    </div>
+                    <div class="card-content">
+                        <div class="media">
                             <div class="media-left">
                                 <figure class="image is-48x48">
-                                    <img id="userIcon" src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
+                                    <img id="userIcon">
                                 </figure>
                             </div>
                             <div class="media-content">
-                                <p class="title is-4" id="userName">John Doe</p>
-                                <p class="subtitle is-6" id="userRank">Amateur</p>
+                                <p class="title is-4" id="userName"></p>
+                                <p class="subtitle is-6" id="userRank"></p>
                             </div>
-                            </div>
+                        </div>
+                    
+                        <div class="content">
                         
-                            <div class="content">
-                            
+                        </div>
+                        <footer class="card-footer">
+                            <a class="card-footer-item" onclick="editProfile()">Edit</a>
+                            <a class="card-footer-item" onclick="firebase.auth().signOut()">Logout</a>
+                        </footer>
+                    </div>
+
+                </div>
+                <div class="card mt" id="profileEdit">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                        Edit Profile
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="field">
+                            <label class="label">Name</label>
+                            <div class="control">
+                                <input type="text" id="newName" class="input">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Icon</label>
+                            <div class="select">
+                                <select id="newIcon"></select>
                             </div>
                         </div>
                     </div>
+                    <footer class="card-footer">
+                        <a onclick="saveProfile()" class="card-footer-item">Save</a>
+                        <a onclick="hideEdit()" class="card-footer-item">Cancel</a>
+                    </footer>
+                </div>
+                <div class="card mt">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            Your Sightings and Locations
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div id="profMap">
+
+                        </div>
+                        <div id="noGeo">
+                            <button class="button is-info" id="actGeo">Activate Location</button>
+                            <br>
+                            <small>We need your location to identify where animals have been found.</small>
+                        </div>
+                        <div id="blockedGeo">
+                            <strong>You have blocked our access to your location.</strong><br>
+                            Your location is required for you to take photos and see animals. <br>
+                            Follow the instructions below<br>
+                            <img src="src/img/activate-location.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="buff"></div>
             </div>
         </div>
 
@@ -133,7 +187,9 @@
             </div>        
         </footer>
 
-        <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-firestore.js"></script>
         <script src="src/lib/jquery-3.3.1.min.js"></script>
         <script src="src/main.js"></script>
     </body>
