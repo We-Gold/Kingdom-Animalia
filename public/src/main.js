@@ -159,6 +159,8 @@ function navigate(el) {
         $('#profile').hide();
     }
     else if (el.id=="cameraBtn") {
+        $('#imageTaken').hide();
+        updateCoords();
         $('#home').hide();
         $('#camera').show();
         $('#search').hide();
@@ -235,6 +237,20 @@ async function updateProfMap() {
 
     init=false;
 
+    await navigator.geolocation.getCurrentPosition(geoSuccess,geoErr);
+}
+
+async function updateCoords() {
+    var geoSuccess = function(position) {
+        localStorage.setItem("coords",JSON.stringify([position.coords.latitude,position.coords.longitude]));
+    };
+    var geoErr = function(err) {
+        if (err.code == 1) {
+            navigate(document.getElementById('profile'));
+            $('#blockedGeo').show();
+        }
+        console.log(err);
+    }
     await navigator.geolocation.getCurrentPosition(geoSuccess,geoErr);
 }
 
@@ -340,6 +356,11 @@ $('#takePhoto').click(()=>{
     vid.srcObject.getVideoTracks().forEach(function(track) {
         track.stop();
     });
+    $('#imageTaken').show();
+    let image = dataURItoBlob(canvas.toDataURL("image/jpeg"));
+    let coords = JSON.parse(localStorage.getItem('coords'));
+    $('#latPick').val(coords[0]);
+    $('#longPick').val(coords[1]);
 });
 
 function stopVideo() {
@@ -363,3 +384,11 @@ function dataURItoBlob(dataURI) {
     var blob = new Blob([ab], {type: mimeString});
     return blob;
 }
+
+$('#animalOp').change(()=>{
+    if($('#animalOp').val()=="know") {
+        $('#know').show();
+    } else {
+        $('#know').hide();
+    }
+});

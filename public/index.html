@@ -101,6 +101,30 @@
                         </label>
                     </div>
                 </div>
+                <div id="imageTaken" class="m">
+                    <label class="label">Latitude</label>
+                    <div class="control">
+                        <input type="number" id="latPick" class="input">
+                    </div>
+                    <label class="label">Longitude</label>
+                    <div class="control">
+                        <input type="number" id="longPick" class="input">
+                    </div>
+                    <label class="label">Animal</label>
+                    <div class="select">
+                        <select id="animalOp">
+                            <option value="know">I know the animal</option>
+                            <option value="noknow">I don't know the animal</option>
+                        </select>
+                    </div>
+                    <div id="know">
+                        <div class="control">
+                            <input type="text" id="animalName" class="input mt" placeholder="Enter Animal..">
+                        </div>
+                    </div>
+                    <button class="button is-success mt" id="postAnimal">Submit</button>
+                </div>
+                <div class="buff"></div>
             </div>
         </div>
         <div id="search">

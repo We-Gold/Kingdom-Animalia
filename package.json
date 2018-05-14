@@ -4,7 +4,7 @@
     "description": "The ultimate animal app for animal lovers!",
     "main": "index.js",
     "scripts": {
-        "start": "http-server -c-1 -p 8081"
+        "start": "http-server -a localhost -c-1 -p 8081"
     },
     "keywords": [
         "animal"
