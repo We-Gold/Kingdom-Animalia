@@ -27,6 +27,8 @@ db.settings(settings);
 let usersRef = db.collection('users');
 let dbKey;
 let firUser;
+let mapLayer;
+let pMap;
 
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
@@ -220,12 +222,15 @@ async function updateProfMap() {
 
     coords = JSON.parse(localStorage.getItem("coords"));
 
-    let pMap = L.map('pMap').setView([coords[0], coords[1]], 11);
+    if(pMap && pMap.hasLayer(mapLayer)) {
+        pMap.remove();
+    }
+
+    pMap = L.map('pMap').setView([coords[0], coords[1]], 11);
     
-    L.tileLayer('https://api.mapbox.com/styles/v1/sci-ranch/cjh4soqa72hkb2sqqoh8sympp/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+    mapLayer = L.tileLayer('https://api.mapbox.com/styles/v1/sci-ranch/cjh4soqa72hkb2sqqoh8sympp/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic2NpLXJhbmNoIiwiYSI6ImNqaDRzbjQyNjBxZGwyd28yeGVxOGE3dHUifQ.JTSE-HY4u1v3MWIRhoT8ig', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
-        accessToken: 'pk.eyJ1Ijoic2NpLXJhbmNoIiwiYSI6ImNqaDRzbjQyNjBxZGwyd28yeGVxOGE3dHUifQ.JTSE-HY4u1v3MWIRhoT8ig'
     }).addTo(pMap);
 
     init=false;
