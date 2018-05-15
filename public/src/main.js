@@ -32,6 +32,16 @@ let firUser;
 let mapLayer;
 let pMap;
 
+let userLocationIcon = L.icon({
+    iconUrl: "/src/img/current-location.png",
+    shadowUrl: "/src/img/current-location.png",
+    iconSize: [24,24],
+    shadowSize: [24,24],
+    iconAnchor: [12,12],
+    shadowAnchor: [12,12],
+    popupAnchor: [0,0]
+});
+
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
         firUser = user;
@@ -199,6 +209,29 @@ function navigate(el) {
     }
 }
 
+async function sightingCode(uid,coords,url,animal, size="2") {
+    let userName = "";
+    await usersRef.where("uid", "==", uid).get().then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+            userName = doc.data().name;
+        });
+    })
+    .catch(function(error) {
+        console.log("Error getting documents: ", error);
+    });
+    let newCoords = [];
+    newCoords[0] = (coords[0].substr(0,1)=="-"?coords[0].substr(0,8):coords[0].substr(0,7));
+    newCoords[1] = (coords[1].substr(0,1)=="-"?coords[1].substr(0,8):coords[1].substr(0,7));
+    return `
+        <div>
+            <p class="title${(size=="2"?"":" is-6")}">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
+            <img class="sightImg" src="${url}"${(size="2"?"":" width='50px'")}>
+            <p class="-m">${newCoords[0]}, ${newCoords[1]}</p>
+            <p class="-m${(size=="2"?"":" is-6")}">By ${userName}</p>
+        </div>
+    `;
+}
+
 async function updateProfMap() {
     $('#updatingLocation').show();
     let coords;
@@ -209,10 +242,18 @@ async function updateProfMap() {
         if(!init) {
             coords = JSON.parse(localStorage.getItem("coords"));
             pMap.setView([coords[0], coords[1]], 11);
-            L.marker([coords[0], coords[1]]).addTo(pMap)
+            L.marker([coords[0], coords[1]],{icon:userLocationIcon}).addTo(pMap)
             .bindPopup('Your Location')
             .openPopup();
         }
+        dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
+            querySnapshot.forEach(async function(doc) {
+                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1");
+
+                L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
+                .bindPopup(popup)
+            })
+        });
     };
     var geoErr = function(err) {
         if (err.code == 1) {
@@ -429,12 +470,12 @@ $('#postAnimal').click(async function(){
     let userID = firUser.uid;
     if (animalOption=="know") {
         know = true;
-        animal = $('animalName').val();
+        animal = $('#animalName').val();
 
         if (!animal || !coords || !coords[0] || !coords[1] || animal=="") {
             return;
         }
-        //animal = animal.toLowerCase();
+        animal = animal.toLowerCase();
     } 
     if (!coords || !coords[0] || !coords[1]) {
         return;
@@ -472,6 +513,7 @@ $('#postAnimal').click(async function(){
             });
 
             // Go to animal sighting
+            navigate(document.getElementById('profileBtn'));
         }
     );
 });
