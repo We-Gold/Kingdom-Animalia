@@ -81,9 +81,9 @@
                 <h1 class="is-3">Camera</h1>
             </div>            
             <div class="container">
+                <canvas id="frameCanvas"></canvas>
                 <div id="mediaAccess">
                     <video id="mediaStream" autoplay></video>
-                    <canvas id="frameCanvas"></canvas>
                     <span id="takePhoto" class="fas fa-camera"></span>
                 </div>
                 <div id="noAccess">
@@ -123,6 +123,7 @@
                         </div>
                     </div>
                     <button class="button is-success mt" id="postAnimal">Submit</button>
+                    <progress id="uploadProgress" class="progress is-info" value="0" max="100"></progress>
                 </div>
                 <div class="buff"></div>
             </div>
@@ -238,6 +239,7 @@
         </footer>
 
         <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase-storage.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.0.2/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-firestore.js"></script>
         <script src="src/lib/jquery-3.3.1.min.js"></script>

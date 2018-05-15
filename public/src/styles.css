@@ -144,6 +144,6 @@ body{
     margin-right: 20px;
 }
 
-#imageTaken {
+#imageTaken, #uploadProgress {
     display: none;
 }

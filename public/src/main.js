@@ -22,9 +22,11 @@ if (!firebase.apps.length) {
 }
 
 let db = firebase.firestore();
+let storage = firebase.storage().ref();
 const settings = {timestampsInSnapshots: true};
 db.settings(settings);
 let usersRef = db.collection('users');
+let dbImageRef = db.collection('images');
 let dbKey;
 let firUser;
 let mapLayer;
@@ -345,6 +347,17 @@ function initMedia() {
     });
 }
 
+HTMLCanvasElement.prototype.renderImage = function(blob){
+    var ctx = this.getContext('2d');
+    var img = new Image();
+    let self = this;
+    img.onload = function(){
+        img.width;
+        ctx.drawImage(img,0,0,self.width, img.height/(img.width/self.width));
+    }
+    img.src = URL.createObjectURL(blob);
+};
+  
 $('#takePhoto').click(()=>{
     $('#frameCanvas').show();
     $('#mediaStream').hide();
@@ -357,7 +370,19 @@ $('#takePhoto').click(()=>{
         track.stop();
     });
     $('#imageTaken').show();
-    let image = dataURItoBlob(canvas.toDataURL("image/jpeg"));
+    let coords = JSON.parse(localStorage.getItem('coords'));
+    $('#latPick').val(coords[0]);
+    $('#longPick').val(coords[1]);
+});
+let imagePick;
+$('#imagePick').on('change',(e)=>{
+    imagePick = document.getElementById('imagePick');
+    let image = imagePick.files[0];
+    $('#frameCanvas').show();
+    $('#noAccess').hide();
+    let canvas = document.getElementById('frameCanvas');
+    canvas.renderImage(image);
+    $('#imageTaken').show();
     let coords = JSON.parse(localStorage.getItem('coords'));
     $('#latPick').val(coords[0]);
     $('#longPick').val(coords[1]);
@@ -391,4 +416,62 @@ $('#animalOp').change(()=>{
     } else {
         $('#know').hide();
     }
+});
+
+$('#postAnimal').click(async function(){
+    let canvas = document.getElementById('frameCanvas');
+    let image = dataURItoBlob(canvas.toDataURL("image/jpeg"));
+    let fileName = `${firUser.uid}-${Math.round((new Date()).getTime() / 1000)}`;
+    let coords = [$('#latPick').val(),$('#longPick').val()];
+    let animalOption = $('#animalOp').val();
+    let know = false;
+    let animal;
+    let userID = firUser.uid;
+    if (animalOption=="know") {
+        know = true;
+        animal = $('animalName').val();
+
+        if (!animal || !coords || !coords[0] || !coords[1] || animal=="") {
+            return;
+        }
+        //animal = animal.toLowerCase();
+    } 
+    if (!coords || !coords[0] || !coords[1]) {
+        return;
+    }
+ 
+
+    // NOT IMPLEMENTED - Check if image is appropriate/contains an animal/etc..
+
+    let imageRef = storage.child(`images/${fileName}`);
+
+    let task = imageRef.put(image);
+    await task.on('state_changed',
+        function progress(snapshot) {
+            $('#uploadProgress').show();
+            let percent = (snapshot.bytesTransferred/snapshot.totalBytes) *100;
+            $('#uploadProgress').val(percent);
+        },
+        function error(err) {
+            console.log(err);
+        },
+        function complete() {
+            $('#uploadProgress').val(0);
+            $('#uploadProgress').hide();
+
+            task.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                // param is a full url 
+                let newAnimal = (animal===undefined?"":animal);
+                dbImageRef.add({
+                    imageURL:downloadURL,
+                    user:userID,
+                    coords:coords,
+                    know:know,
+                    animal:newAnimal
+                });
+            });
+
+            // Go to animal sighting
+        }
+    );
 });
