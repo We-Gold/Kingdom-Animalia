@@ -32,6 +32,16 @@ let firUser;
 let mapLayer;
 let pMap;
 
+let animals;
+
+fetch('/src/animals.json')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(animalsJSON) {
+    animals = animalsJSON.english;
+});
+
 let userLocationIcon = L.icon({
     iconUrl: "/src/img/current-location.png",
     shadowUrl: "/src/img/current-location.png",
@@ -171,8 +181,17 @@ function navigate(el) {
         $('#profile').hide();
     }
     else if (el.id=="cameraBtn") {
-        $('#imageTaken').hide();
+        $('#latPick').val(0);
+        $('#longPick').val(0);
+        $('#animalOp').val("know");
+        $('#animalName').val("");
+        $('#imagePick').val('');
         updateCoords();
+        $('#imageTaken').hide();
+        $('#animalName').autocomplete({
+            source: animals,
+            delay: 100,
+        });
         $('#home').hide();
         $('#camera').show();
         $('#search').hide();

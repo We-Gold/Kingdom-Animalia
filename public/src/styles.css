@@ -160,3 +160,7 @@ body{
 .-m {
     margin: 0;
 }
+
+#postAnimal {
+    display: block;
+}
