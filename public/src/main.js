@@ -262,8 +262,7 @@ async function updateProfMap() {
             coords = JSON.parse(localStorage.getItem("coords"));
             pMap.setView([coords[0], coords[1]], 11);
             L.marker([coords[0], coords[1]],{icon:userLocationIcon}).addTo(pMap)
-            .bindPopup('Your Location')
-            .openPopup();
+            .bindPopup('Your Location');
         }
         dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
             querySnapshot.forEach(async function(doc) {
