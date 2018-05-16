@@ -2,7 +2,6 @@ self.addEventListener('install',function(e) {
     console.log('SW Installed');
     e.waitUntil(caches.open('static')
     .then((cache)=>{
-        console.log('123');
         cache.addAll([
             '/',
             '/index.html',

@@ -31,6 +31,8 @@ let dbKey;
 let firUser;
 let mapLayer;
 let pMap;
+let markers = [];
+
 
 let animals;
 
@@ -52,7 +54,7 @@ let userLocationIcon = L.icon({
     popupAnchor: [0,0]
 });
 
-firebase.auth().onAuthStateChanged(function(user) {
+firebase.auth().onAuthStateChanged(async function(user) {
     if (user) {
         firUser = user;
         $('#login').hide();
@@ -62,7 +64,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         $('#community').hide();
         $('#profile').hide();
         $('.footer').show();
-        usersRef.where("uid","==",user.uid).get().then(function(querySnapshot) {
+        await usersRef.where("uid","==",user.uid).get().then(function(querySnapshot) {
             if (querySnapshot.docs.length!==0) {
                 dbKey = querySnapshot.docs[0].id;
                 $('#userIcon').attr('src',`src/img/icons/${querySnapshot.docs[0].data().icon}.jpeg`);
@@ -96,6 +98,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         .catch(function(error) {
             console.log("Error getting documents: ", error);
         });
+        updateCoords();
     } else {
         $('#login').show();
         $('#home').hide();
@@ -200,11 +203,19 @@ function navigate(el) {
         initMedia();
     }
     else if (el.id=="searchBtn") {
+        $('#searchAnimInp').autocomplete({
+            source: animals,
+            delay: 200,
+        });
         $('#home').hide();
         $('#camera').hide();
         $('#search').show();
+        $('#pMap').appendTo('#searchBody');
+        $('#pMap').css("min-height",($(document).height()-48-51-44));
+        console.log($(document).height()+" "+$('.footer').height()+" "+$('#searchDiv').height()+" "+$('.head').height());
         $('#community').hide();
         $('#profile').hide();
+        updateSearchMap();
     }
     else if (el.id=="communityBtn"){
         $('#home').hide();
@@ -225,10 +236,12 @@ function navigate(el) {
                 updateProfMap();
             }
         });
+        $('#pMap').appendTo('#profMap');
+        $('#pMap').css("min-height","240px");
     }
 }
 
-async function sightingCode(uid,coords,url,animal, size="2") {
+async function sightingCode(uid,coords,url,animal, size="2",know,key) {
     let userName = "";
     await usersRef.where("uid", "==", uid).get().then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
@@ -260,16 +273,18 @@ async function updateProfMap() {
         $('#updatingLocation').hide();
         if(!init) {
             coords = JSON.parse(localStorage.getItem("coords"));
-            pMap.setView([coords[0], coords[1]], 11);
+            pMap.setView([coords[0], coords[1]], 1);
             L.marker([coords[0], coords[1]],{icon:userLocationIcon}).addTo(pMap)
             .bindPopup('Your Location');
         }
         dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
             querySnapshot.forEach(async function(doc) {
-                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1");
+                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
 
-                L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
-                .bindPopup(popup)
+                let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
+                .bindPopup(popup);
+
+                markers.push(marker);
             })
         });
     };
@@ -299,6 +314,24 @@ async function updateProfMap() {
     init=false;
 
     await navigator.geolocation.getCurrentPosition(geoSuccess,geoErr);
+}
+
+async function updateSearchMap() {
+    let coords = JSON.parse(localStorage.getItem("coords"));
+
+    if(pMap && pMap.hasLayer(mapLayer)) {
+        pMap.remove();
+        for(let i=0;i<markers.length; i++) {
+            markers[i].remove();
+        }
+    }
+
+    pMap = L.map('pMap').setView([coords[0], coords[1]], 3);
+    
+    mapLayer = L.tileLayer('https://api.mapbox.com/styles/v1/sci-ranch/cjh4soqa72hkb2sqqoh8sympp/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic2NpLXJhbmNoIiwiYSI6ImNqaDRzbjQyNjBxZGwyd28yeGVxOGE3dHUifQ.JTSE-HY4u1v3MWIRhoT8ig', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+    }).addTo(pMap);
 }
 
 async function updateCoords() {
@@ -535,3 +568,4 @@ $('#postAnimal').click(async function(){
         }
     );
 });
+
