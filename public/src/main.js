@@ -64,6 +64,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
         $('#community').hide();
         $('#profile').hide();
         $('.footer').show();
+        updateHomeFeed();
         await usersRef.where("uid","==",user.uid).get().then(function(querySnapshot) {
             if (querySnapshot.docs.length!==0) {
                 dbKey = querySnapshot.docs[0].id;
@@ -178,6 +179,8 @@ function navigate(el) {
     stopVideo()
     if (el.id=="homeBtn") {
         $('#home').show();
+        clearHomeFeed();
+        updateHomeFeed();
         $('#camera').hide();
         $('#search').hide();
         $('#community').hide();
@@ -212,7 +215,6 @@ function navigate(el) {
         $('#search').show();
         $('#pMap').appendTo('#searchBody');
         $('#pMap').css("min-height",($(document).height()-48-51-44));
-        console.log($(document).height()+" "+$('.footer').height()+" "+$('#searchDiv').height()+" "+$('.head').height());
         $('#community').hide();
         $('#profile').hide();
         updateSearchMap();
@@ -241,16 +243,16 @@ function navigate(el) {
     }
 }
 
-async function sightingCode(uid,coords,url,animal, size="2",know,key) {
-    let userName = "";
-    await usersRef.where("uid", "==", uid).get().then(function(querySnapshot) {
+function sightingCode(uid,coords,url,animal, size="2",know,key) {
+    /*let userName = "";
+    usersRef.where("uid", "==", uid).get().then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
             userName = doc.data().name;
         });
-    })
+    }) 
     .catch(function(error) {
         console.log("Error getting documents: ", error);
-    });
+    });*/
     let newCoords = [];
     newCoords[0] = (coords[0].substr(0,1)=="-"?coords[0].substr(0,8):coords[0].substr(0,7));
     newCoords[1] = (coords[1].substr(0,1)=="-"?coords[1].substr(0,8):coords[1].substr(0,7));
@@ -259,9 +261,10 @@ async function sightingCode(uid,coords,url,animal, size="2",know,key) {
             <p class="title${(size=="2"?"":" is-6")}">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
             <img class="sightImg" src="${url}"${(size="2"?"":" width='50px'")}>
             <p class="-m">${newCoords[0]}, ${newCoords[1]}</p>
-            <p class="-m${(size=="2"?"":" is-6")}">By ${userName}</p>
         </div>
     `;
+    // <p class="-m${(size=="2"?"":" is-6")}">By ${userName}</p>
+
 }
 
 async function updateProfMap() {
@@ -269,24 +272,26 @@ async function updateProfMap() {
     let coords;
     let init = true;
     var geoSuccess = function(position) {
-        localStorage.setItem("coords",JSON.stringify([position.coords.latitude,position.coords.longitude]));
-        $('#updatingLocation').hide();
-        if(!init) {
-            coords = JSON.parse(localStorage.getItem("coords"));
-            pMap.setView([coords[0], coords[1]], 1);
-            L.marker([coords[0], coords[1]],{icon:userLocationIcon}).addTo(pMap)
-            .bindPopup('Your Location');
+        if ($('#profile').is(':visible')) { 
+            localStorage.setItem("coords",JSON.stringify([position.coords.latitude,position.coords.longitude]));
+            $('#updatingLocation').hide();
+            if(!init) {
+                coords = JSON.parse(localStorage.getItem("coords"));
+                pMap.setView([coords[0], coords[1]], 1);
+                L.marker([coords[0], coords[1]],{icon:userLocationIcon}).addTo(pMap)
+                .bindPopup('Your Location');
+            }
+            dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
+                querySnapshot.forEach(async function(doc) {
+                    let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
+
+                    let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
+                    .bindPopup(popup);
+
+                    markers.push(marker);
+                })
+            });
         }
-        dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
-            querySnapshot.forEach(async function(doc) {
-                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
-
-                let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
-                .bindPopup(popup);
-
-                markers.push(marker);
-            })
-        });
     };
     var geoErr = function(err) {
         if (err.code == 1) {
@@ -302,7 +307,13 @@ async function updateProfMap() {
 
     if(pMap && pMap.hasLayer(mapLayer)) {
         pMap.remove();
-    }
+        if(markers.length!=0) {
+            for(let i=0;i<markers.length; i++) {
+                markers[i].remove();
+            }
+        }
+        
+    } 
 
     pMap = L.map('pMap').setView([coords[0], coords[1]], 11);
     
@@ -334,6 +345,23 @@ async function updateSearchMap() {
     }).addTo(pMap);
 }
 
+async function showAnimalMarkers() {
+    if ($('#search').is(':visible')) {
+        let searchAnimal = $('#searchAnimInp').val();
+        searchAnimal = searchAnimal.toLowerCase();
+        await dbImageRef.where('animal','==',searchAnimal).get().then(function(snap){
+            snap.forEach(async function(doc){
+                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
+
+                let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
+                .bindPopup(popup);
+
+                markers.push(marker);
+            });
+        });
+    }
+}
+
 async function updateCoords() {
     var geoSuccess = function(position) {
         localStorage.setItem("coords",JSON.stringify([position.coords.latitude,position.coords.longitude]));
@@ -343,10 +371,13 @@ async function updateCoords() {
             navigate(document.getElementById('profile'));
             $('#blockedGeo').show();
         }
-        console.log(err);
     }
     await navigator.geolocation.getCurrentPosition(geoSuccess,geoErr);
 }
+
+$('#searchAnimBtn').click(()=>{
+    showAnimalMarkers();
+});
 
 $('#toggleAuth').click(()=>{
     $('#loginForm').toggle();
@@ -519,6 +550,7 @@ $('#postAnimal').click(async function(){
     let know = false;
     let animal;
     let userID = firUser.uid;
+    let ts = Math.round((new Date()).getTime() / 1000);
     if (animalOption=="know") {
         know = true;
         animal = $('#animalName').val();
@@ -559,7 +591,8 @@ $('#postAnimal').click(async function(){
                     user:userID,
                     coords:coords,
                     know:know,
-                    animal:newAnimal
+                    animal:newAnimal,
+                    timestamp: ts
                 });
             });
 
@@ -569,3 +602,23 @@ $('#postAnimal').click(async function(){
     );
 });
 
+function clearHomeFeed() {
+    $('#feed').html("");
+}
+
+function updateHomeFeed() {
+    if($('#home').is(':visible')){
+        dbImageRef.orderBy("timestamp","desc").limit(10).get().then(function(snap){
+            snap.forEach(function(doc){
+                let item = `
+                <div class="card mt">
+                    <div class="card-content">
+                        ${sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.key)}
+                    </div>
+                </div>
+                `;
+                document.getElementById('feed').innerHTML += item;
+            });
+        });
+    }
+}
