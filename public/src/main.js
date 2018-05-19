@@ -32,7 +32,7 @@ let firUser;
 let mapLayer;
 let pMap;
 let markers = [];
-
+let locationPerm;
 
 let animals;
 
@@ -71,6 +71,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
                 $('#userIcon').attr('src',`src/img/icons/${querySnapshot.docs[0].data().icon}.jpeg`);
                 $('#userName').text(querySnapshot.docs[0].data().name);
                 $('#userRank').text(querySnapshot.docs[0].data().rank);
+                locationPerm = querySnapshot.docs[0].data().locationPerm;
                 if (querySnapshot.docs[0].data().locationPerm==false) {
                     $('#noGeo').show();
                 } else {
@@ -146,19 +147,14 @@ function saveProfile() {
     let icon_o = $('#newIcon').val();
     let icon = toUpper($('#newIcon').val());
     let name = $('#newName').val();
-    usersRef.where("uid","==",firUser.uid).get().then(function(querySnapshot) {
-        if (querySnapshot.docs.length!==0) {
-            let doc = usersRef.doc(querySnapshot.docs[0].id);
-            doc.update({
-                name:name,
-                icon:icon
-            }); 
-        } 
-    
-        $('#userIcon').attr('src',`src/img/icons/${icon_o}.jpeg`);
-        $('#userName').text(name);
-        $('#profileEdit').fadeOut(1000);
-    })
+    usersRef.doc(dbKey).update({
+        name:name,
+        icon:icon
+    }); 
+
+    $('#userIcon').attr('src',`src/img/icons/${icon_o}.jpeg`);
+    $('#userName').text(name);
+    $('#profileEdit').fadeOut(1000);
 }
 
 window.addEventListener('load',()=>{
@@ -232,12 +228,10 @@ function navigate(el) {
         $('#search').hide();
         $('#community').hide();
         $('#profile').show();
-        usersRef.doc(dbKey).get().then((doc)=>{
-            if (doc.data().locationPerm){
-                $('#profMap').show();
-                updateProfMap();
-            }
-        });
+        if (locationPerm) {
+            $('#profMap').show();
+            updateProfMap();
+        }
         $('#pMap').appendTo('#profMap');
         $('#pMap').css("min-height","240px");
     }
@@ -260,7 +254,7 @@ function sightingCode(uid,coords,url,animal, size="2",know,key) {
         <div>
             <p class="title${(size=="2"?"":" is-6")}">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
             <img class="sightImg" src="${url}"${(size="2"?"":" width='50px'")}>
-            <p class="-m">${newCoords[0]}, ${newCoords[1]}</p>
+        <p class="${(size=="1"?"-m":"mt")}">${newCoords[0]}, ${newCoords[1]}</p>
         </div>
     `;
     // <p class="-m${(size=="2"?"":" is-6")}">By ${userName}</p>
@@ -606,6 +600,35 @@ function clearHomeFeed() {
     $('#feed').html("");
 }
 
+function showModal() {
+    $('#modal').addClass('is-active');
+}
+
+function closeModal() {
+    $('#modal').removeClass('is-active');
+}
+
+function changeName(id,url) {
+    showModal();
+    $('#newSpecies').val("");
+    $('#modal-img').attr('src',url);
+    $('#saveNewSpecies').attr("onclick","saveNewSpecies('"+id+"')");
+}
+
+function saveNewSpecies(id) {
+    let species = $('#newSpecies').val();
+    species = species.toLowerCase();
+    if(species && species!=""){
+        dbImageRef.doc(id).update({
+            know: true,
+            animal: species,
+        });
+        closeModal();
+        clearHomeFeed();
+        updateHomeFeed();
+    }
+}
+
 function updateHomeFeed() {
     if($('#home').is(':visible')){
         dbImageRef.orderBy("timestamp","desc").limit(10).get().then(function(snap){
@@ -615,9 +638,12 @@ function updateHomeFeed() {
                     <div class="card-content">
                         ${sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.key)}
                     </div>
-                </div>
-                `;
+                    <div class="card-footer">
+                        <a class="card-footer-item ${(doc.data().animal==""?"":"hide")}" onclick="changeName('${doc.id}','${doc.data().imageURL}')">Identify Animal</a>
+                    </div>
+                </div>`;
                 document.getElementById('feed').innerHTML += item;
+                //<a class="card-footer-item">Suggest Change</a>
             });
         });
     }

@@ -245,6 +245,25 @@
             </div>
         </div>
 
+        <div id="modal" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Indentify Animal</p>
+                    <button class="delete" aria-label="close" onclick="closeModal()"></button>
+                </header>
+                <section class="modal-card-body" id="modal-content">
+                    <img id="modal-img">
+                    <input class="input is-success" id="newSpecies" placeholder="Identify Animal">
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" id="saveNewSpecies">Save changes</button>
+                    <button class="button" onclick="closeModal()">Cancel</button>
+                </footer>
+            </div>
+        </div>
+              
+
         <footer class="footer">
             <div class="tabNav">
                 <a id="homeBtn" onclick="navigate(this)"><span class="fas fa-home fabtn"></span></a>
