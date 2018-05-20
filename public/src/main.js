@@ -708,11 +708,23 @@ function showQuestion(id) {
                 </tbody>
             </table>
             <hr>
-            <textarea class="textarea" maxlength="250" placeholder="Add A Response!" rows="3"></textarea>
-            <button class="button is-success is-fullwidth nbr">Respond</button>
+            <textarea id="${doc.id}" class="textarea" maxlength="250" placeholder="Add A Response!" rows="3"></textarea>
+            <button class="button is-success is-fullwidth nbr" onclick="respondQ('${doc.id}')">Respond</button>
             `;
         $('#qDiv').html(html);
     });
+}
+
+async function respondQ(id) {
+    await qRef.doc(id).get().then((doc)=>{
+        let oldRes = doc.data().responses;
+        oldRes.push($('#'+id).val());
+        qRef.doc(id).update({
+            responses: oldRes
+        });
+    });
+    // Respond
+    showQuestion(id);
 }
 
 function navWiki() {
@@ -753,6 +765,7 @@ function addQuestion() {
             responses: arr,
         });
     }
+    syncQ();
 }
 
 function syncQ() {
