@@ -27,13 +27,14 @@ const settings = {timestampsInSnapshots: true};
 db.settings(settings);
 let usersRef = db.collection('users');
 let dbImageRef = db.collection('images');
+let qRef = db.collection('questions');
 let dbKey;
 let firUser;
 let mapLayer;
 let pMap;
 let markers = [];
 let locationPerm;
-
+let qsDef;
 let animals;
 
 fetch('/src/animals.json')
@@ -42,6 +43,17 @@ fetch('/src/animals.json')
   })
   .then(function(animalsJSON) {
     animals = animalsJSON.english;
+});
+
+
+window.addEventListener('load',()=>{
+    $('#login').show();
+    $('#home').hide();
+    $('#camera').hide();
+    $('#search').hide();
+    $('#community').hide();
+    $('#profile').hide();
+    $('.footer').hide();
 });
 
 let userLocationIcon = L.icon({
@@ -157,15 +169,6 @@ function saveProfile() {
     $('#profileEdit').fadeOut(1000);
 }
 
-window.addEventListener('load',()=>{
-    $('#login').show();
-    $('#home').hide();
-    $('#camera').hide();
-    $('#search').hide();
-    $('#community').hide();
-    $('#profile').hide();
-    $('.footer').hide();
-});
 
 function toggleFooter() {
     $('.footer').toggle();
@@ -221,6 +224,7 @@ function navigate(el) {
         $('#search').hide();
         $('#community').show();
         $('#profile').hide();
+        navQuestions();
     }
     else if (el.id=="profileBtn"){
         $('#home').hide();
@@ -647,4 +651,93 @@ function updateHomeFeed() {
             });
         });
     }
+}
+
+function navQuestions() {
+    $('#comQuestions').show();
+    $('#comWiki').hide();
+    $('#comID').hide();
+
+    $('#navQ').addClass('is-active');
+    $('#navW').removeClass('is-active');
+    $('#navID').removeClass('is-active');
+
+    $('#qt').show();
+    $('#qDiv').hide();
+    $('#addQDiv').hide();
+    $('#newQ').show();
+
+    if (!qsDef) {
+        qRef.orderBy("timestamp","desc").limit(10).get().then((snap)=>{
+            snap.forEach((doc)=>{
+                 document.getElementById('qtb').innerHTML+=`
+                    <tr onclick="showQuestion('${doc.id}')">
+                        <td>${doc.data().question}</td>
+                        <td>${doc.data().responses.length}</td>
+                    </tr>
+                `;
+            });
+        });
+    }
+    qsDef=true;
+}
+
+function showQuestion(id) {
+    $('#qt').hide();
+    $('#qDiv').show();
+    $('#newQ').hide();
+    qRef.doc(id).get().then((doc)=>{
+        let ques = "";
+        for (let i=0; i<doc.data().responses.length; i++) {
+            ques+=`
+                <tr>
+                    <td>${doc.data().responses[i]}</td>
+                </tr>
+            `;
+        }
+        let html = `
+            <h1 class="title mt">${doc.data().question}</h1>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Responses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${ques}
+                </tbody>
+            </table>
+            <hr>
+            <textarea class="textarea" maxlength="250" placeholder="Add A Response!" rows="3"></textarea>
+            <button class="button is-success is-fullwidth nbr">Respond</button>
+            `;
+        $('#qDiv').html(html);
+    });
+}
+
+function navWiki() {
+    $('#comQuestions').hide();
+    $('#comWiki').show();
+    $('#comID').hide();
+
+    $('#navQ').removeClass('is-active');
+    $('#navW').addClass('is-active');
+    $('#navID').removeClass('is-active');
+}
+
+function navIDAnim() {
+    $('#comQuestions').hide();
+    $('#comWiki').hide();
+    $('#comID').show();
+
+    $('#navQ').removeClass('is-active');
+    $('#navW').removeClass('is-active');
+    $('#navID').addClass('is-active');
+}
+
+function showAddQ() {
+    $('#qt').hide();
+    $('#qDiv').hide();
+    $('#addQDiv').show();
+    $('#newQ').hide();
 }

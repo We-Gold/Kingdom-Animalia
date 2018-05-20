@@ -158,7 +158,38 @@
                 <h1 class="is-3">Community</h1>
             </div>
             <div class="container is-fluid">
-                Ea et non ullamco excepteur in.
+                <div class="tabs is-small mt">
+                    <ul>
+                        <li id="navQ" class="is-active"><a onclick="navQuestions()">Questions</a></li>
+                        <li id="navW"><a onclick="navWiki()">Animal Wiki</a></li>
+                        <li id="navID"><a onclick="navIDAnim()">Identify Animals</a></li>
+                    </ul>
+                </div>
+                <div id="comQuestions">
+                    <button id="newQ" class="button is-success is-fullwidth mb" onclick="showAddQ()">Ask A Question</button>
+                    <table id="qt" class="table is-hoverable is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Responses</th>
+                            </tr>
+                        </thead>
+                        <tbody id="qtb">
+
+                        </tbody>
+                    </table>
+                    <div id="qDiv"></div>
+                    <div id="addQDiv">
+                        <textarea class="textarea" maxlength="250" placeholder="Enter Question..." rows="3"></textarea>
+                        <button class="button is-success is-fullwidth nbr">Ask</button>
+                    </div>
+                </div>
+                <div id="comWiki">
+                    W
+                </div>
+                <div id="comID">
+                    ID
+                </div>
             </div>
         </div>
         <div id="profile">

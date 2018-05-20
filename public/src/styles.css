@@ -192,3 +192,20 @@ html, body {
     cursor: default;
     z-index:1200 !important;
 }  
+
+
+#comWiki, #comID, #qDiv {
+    display: none;
+}
+
+.nbr {
+    border-radius: 0;
+}
+
+.mb {
+    margin-bottom: 20px;
+}
+
+#addQDiv {
+    display: none;
+}
