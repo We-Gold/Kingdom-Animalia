@@ -741,3 +741,22 @@ function showAddQ() {
     $('#addQDiv').show();
     $('#newQ').hide();
 }
+
+function addQuestion() {
+    let newQText = $('#newQText').val();
+    let ts = Math.round((new Date()).getTime() / 1000);
+    let arr = [];
+    if (newQText && newQText!="") {
+        qRef.add({
+            question: newQText,
+            timestamp: ts,
+            responses: arr,
+        });
+    }
+}
+
+function syncQ() {
+    qsDef = false;
+    $('#qtb').html("");
+    navQuestions();
+}

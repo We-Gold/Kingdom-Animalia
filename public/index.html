@@ -170,7 +170,7 @@
                     <table id="qt" class="table is-hoverable is-fullwidth">
                         <thead>
                             <tr>
-                                <th>Question</th>
+                                <th><a class="link" onclick="syncQ()"><i style="font-size: 15px;" class="fas fa-sync"></i></a>   Question</th>
                                 <th>Responses</th>
                             </tr>
                         </thead>
@@ -180,8 +180,8 @@
                     </table>
                     <div id="qDiv"></div>
                     <div id="addQDiv">
-                        <textarea class="textarea" maxlength="250" placeholder="Enter Question..." rows="3"></textarea>
-                        <button class="button is-success is-fullwidth nbr">Ask</button>
+                        <textarea id="newQText" class="textarea" maxlength="250" placeholder="Enter Question..." rows="3"></textarea>
+                        <button class="button is-success is-fullwidth nbr" onclick="addQuestion()">Ask</button>
                     </div>
                 </div>
                 <div id="comWiki">

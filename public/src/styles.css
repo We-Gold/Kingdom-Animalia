@@ -209,3 +209,8 @@ html, body {
 #addQDiv {
     display: none;
 }
+
+.link {
+    text-decoration: none;
+    color: #375A28;
+}
