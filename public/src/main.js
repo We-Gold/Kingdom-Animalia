@@ -653,6 +653,26 @@ function updateHomeFeed() {
     }
 }
 
+function updateIDAnim() {
+    if($('#comID').is(':visible')){
+        document.getElementById('comID').innerHTML = "";
+        dbImageRef.where("know","==",false).limit(10).get().then(function(snap){
+            snap.forEach(function(doc){
+                let item = `
+                <div class="card mt">
+                    <div class="card-content">
+                        ${sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.key)}
+                    </div>
+                    <div class="card-footer">
+                        <a class="card-footer-item ${(doc.data().animal==""?"":"hide")}" onclick="changeName('${doc.id}','${doc.data().imageURL}')">Identify Animal</a>
+                    </div>
+                </div>`;
+                document.getElementById('comID').innerHTML += item;
+            });
+        });
+    }
+}
+
 function navQuestions() {
     $('#comQuestions').show();
     $('#comWiki').hide();
@@ -745,6 +765,8 @@ function navIDAnim() {
     $('#navQ').removeClass('is-active');
     $('#navW').removeClass('is-active');
     $('#navID').addClass('is-active');
+
+    updateIDAnim();
 }
 
 function showAddQ() {
