@@ -70,7 +70,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
     if (user) {
         firUser = user;
         $('#login').hide();
-        $('#home').show();
+        $('#home').hide();
         $('#camera').hide();
         $('#search').hide();
         $('#community').hide();
@@ -113,6 +113,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
             console.log("Error getting documents: ", error);
         });
         updateCoords();
+        navigate(document.getElementById('profileBtn'));
     } else {
         $('#login').show();
         $('#home').hide();
@@ -357,6 +358,10 @@ async function showAnimalMarkers() {
                 markers.push(marker);
             });
         });
+
+        let mArr = new L.featureGroup(markers);
+        pMap.fitBounds(mArr.getBounds());
+        pMap.setZoom(2);
     }
 }
 
@@ -455,6 +460,8 @@ function initMedia() {
 
     navigator.mediaDevices.getUserMedia({video: {width: { min: 1280 },height: { min: 720 }}})
     .then(function(stream) {
+        $('#mediaAccess').show();
+        $('#noAccess').hide();
         $('#mediaStream').show();
         $('#frameCanvas').hide();
         $('#takePhoto').show();
@@ -478,11 +485,17 @@ HTMLCanvasElement.prototype.renderImage = function(blob){
     }
     img.src = URL.createObjectURL(blob);
 };
+
+$('#switchUpload').click(()=>{
+    $('#mediaAccess').hide();
+    $('#noAccess').show();
+});
   
 $('#takePhoto').click(()=>{
     $('#frameCanvas').show();
     $('#mediaStream').hide();
     $('#takePhoto').hide();
+    $('#switchUpload').hide();
     let ctx = document.getElementById('frameCanvas').getContext('2d');
     let vid = document.getElementById('mediaStream');
     let canvas = document.getElementById('frameCanvas');
@@ -655,7 +668,7 @@ function updateHomeFeed() {
 
 function updateIDAnim() {
     if($('#comID').is(':visible')){
-        document.getElementById('comID').innerHTML = "";
+        document.getElementById('comID').innerHTML = "There are no unidentified animals.";
         dbImageRef.where("know","==",false).limit(10).get().then(function(snap){
             snap.forEach(function(doc){
                 let item = `
