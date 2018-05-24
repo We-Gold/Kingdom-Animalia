@@ -16,6 +16,12 @@ var config = {
 let icons = ['Bison','Dolphin','Eagle','Gorilla','Lobster','Monkey','Cow','Deer','Duck','Rabbit','Spider','Wolf','Turkey','Lion','Pig','Snake','Shark','Bear','Fish','Chicken','Horse','Cat','Dog'];
 let rank = ['Amateur','Bacteria','Ant','Mouse','Capybara','Kangaroo','Gorilla','Elephant','Blue Whale'];
 
+var mdit = window.markdownit({
+    linkify: true,
+    typographer: true,
+    breaks: true,
+});
+
 
 if (!firebase.apps.length) {
     firebase.initializeApp(config);
@@ -28,6 +34,7 @@ db.settings(settings);
 let usersRef = db.collection('users');
 let dbImageRef = db.collection('images');
 let qRef = db.collection('questions');
+let wRef = db.collection('wikis');
 let dbKey;
 let firUser;
 let mapLayer;
@@ -36,6 +43,7 @@ let markers = [];
 let locationPerm;
 let qsDef;
 let animals;
+let wikiFeed = false;
 
 fetch('/src/animals.json')
   .then(function(response) {
@@ -767,7 +775,33 @@ function navWiki() {
 
     $('#navQ').removeClass('is-active');
     $('#navW').addClass('is-active');
-    $('#navID').removeClass('is-active');
+    $('#navID').removeClass('is-active');   
+    if(wikiFeed==false) {
+        wRef.orderBy("timestamp","desc").limit(3).get().then((snap)=>{
+            snap.forEach((doc)=>{
+                let animal = doc.data().animal;
+                let inmd = doc.data().md;
+                let md = inmd.substr(0,250);
+                let mdHTML = mdit.render(md);
+                let html = `
+                <div class="card mt">
+                    <header class="card-header">
+                        <p class="card-header-title">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            ${mdHTML}
+                        </div>
+                    </div>
+                </div>
+                `;
+                let oldHTML = $('#wikiFeed').html();
+                $('#wikiFeed').html(oldHTML+html);
+            });
+        });
+        wikiFeed=true;
+    }
+    
 }
 
 function navIDAnim() {

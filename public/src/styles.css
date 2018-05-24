@@ -43,6 +43,7 @@
 
 body{
     margin: 0;
+    background-color: #f9f9f9;
 }
 
 .is-fluid {
@@ -218,4 +219,15 @@ html, body {
 .link {
     text-decoration: none;
     color: #375A28;
+}
+
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.17em; }
+h4 { font-size: 1.12em; }
+h5 { font-size: .83em; }
+h6 { font-size: .75em; }
+
+.card {
+    box-shadow:0 2px 3px rgba(10,10,10,.1),0 0 0 1px rgba(10,10,10,.1);
 }

@@ -13,5 +13,9 @@
     "license": "MIT",
     "devDependencies": {
         "http-server": "^0.10.0"
+    },
+    "dependencies": {
+        "markdown-it": "^8.4.1",
+        "simplemde": "^1.11.2"
     }
 }

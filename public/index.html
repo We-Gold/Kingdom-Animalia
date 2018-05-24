@@ -20,6 +20,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.4.1/markdown-it.min.js"></script>
+
     <link rel="stylesheet" href="src/styles.css">
 </head>
     <body>
@@ -75,7 +79,7 @@
         </div>
         <div id="home">
             <div class="head">
-                <h1 class="is-3">Home</h1>
+                <p class="is-3">Home</p>
             </div>
             <div class="container is-fluid">
                 <div id="feed"></div>
@@ -83,7 +87,7 @@
         </div>
         <div id="camera">
             <div class="head">
-                <h1 class="is-3">Camera</h1>
+                <p class="is-3">Camera</p>
             </div>            
             <div class="container">
                 <canvas id="frameCanvas"></canvas>
@@ -136,19 +140,19 @@
         </div>
         <div id="search">
             <div class="head">
-                <h1 class="is-3">Search</h1>
+                <p class="is-3">Search</p>
             </div>
             <div class="" id="searchBody">
                 <div id="searchDiv" class="mt">
                     <div class="field has-addons is-horizontal">
                         <div class="control is-expanded has-icons-left">
-                            <input type="text" class="input is-info is-fullwidth" id="searchAnimInp" placeholder="Enter Animal..">
+                            <input type="text" class="input is-success is-fullwidth" id="searchAnimInp" placeholder="Enter Animal..">
                             <span class="icon is-medium is-left">
                             <i class="fas fa-dove"></i>
                             </span>
                         </div>
                         <div class="control">
-                            <a class="button is-info" id="searchAnimBtn"><i class="fas fa-search"></i></a>
+                            <a class="button is-success" id="searchAnimBtn"><i class="fas fa-search"></i></a>
                         </div>
                     </div>
                 </div>
@@ -156,7 +160,7 @@
         </div>
         <div id="community">
             <div class="head">
-                <h1 class="is-3">Community</h1>
+                <p class="is-3">Community</p>
             </div>
             <div class="container is-fluid">
                 <div class="tabs is-small mt">
@@ -186,7 +190,21 @@
                     </div>
                 </div>
                 <div id="comWiki">
-                    W
+                    <button class="button is-success mb is-fullwidth">Create A Wiki</button>
+                    <div class="field has-addons is-horizontal mb">
+                        <div class="control is-expanded has-icons-left">
+                            <input type="text" class="input is-success is-fullwidth" id="searchWikiInp" placeholder="Enter Animal..">
+                            <span class="icon is-medium is-left">
+                            <i class="fas fa-dove"></i>
+                            </span>
+                        </div>
+                        <div class="control">
+                            <a class="button is-success" id="searchWikiBtn"><i class="fas fa-search"></i></a>
+                        </div>
+                    </div>
+                    <div id="wikiFeed">
+
+                    </div>
                 </div>
                 <div id="comID">
                     
@@ -195,7 +213,7 @@
         </div>
         <div id="profile">
             <div class="head">
-                <h1 class="is-3">Profile</h1>
+                <p class="is-3">Profile</p>
             </div>
             <div class="container is-fluid">
                 <div class="card mt" id="profileInfo">
