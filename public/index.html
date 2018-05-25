@@ -190,8 +190,19 @@
                     </div>
                 </div>
                 <div id="comWiki">
-                    <button class="button is-success mb is-fullwidth">Create A Wiki</button>
-                    <div class="field has-addons is-horizontal mb">
+                    <button class="button is-success mb is-fullwidth" id="makeWikiBtn" onclick="makeWiki()">Create A Wiki</button>
+                    <div id="makeWiki">
+                        <div id="newWikiForm">
+                            <label class="label">Which animal is this wiki for?</label>
+                            <input type="text" id="newWikiAnim" class="input" placeholder="Enter Animal...">
+                            <button class="button is-success mt" onclick="createWiki()">Create Wiki!</button>
+                        </div>
+                    </div>
+                    <div id="wikiEditorDiv">
+                        <textarea id="wikiEditor"></textarea>
+                        <button class="button is-success" id="saveWiki">Save Wiki</button>
+                    </div>
+                    <div class="field has-addons is-horizontal mb" id="searchWikis">
                         <div class="control is-expanded has-icons-left">
                             <input type="text" class="input is-success is-fullwidth" id="searchWikiInp" placeholder="Enter Animal..">
                             <span class="icon is-medium is-left">
@@ -205,6 +216,7 @@
                     <div id="wikiFeed">
 
                     </div>
+                    <div class="buff"></div>
                 </div>
                 <div id="comID">
                     

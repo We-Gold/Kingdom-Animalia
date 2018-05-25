@@ -17,11 +17,11 @@ let icons = ['Bison','Dolphin','Eagle','Gorilla','Lobster','Monkey','Cow','Deer'
 let rank = ['Amateur','Bacteria','Ant','Mouse','Capybara','Kangaroo','Gorilla','Elephant','Blue Whale'];
 
 var mdit = window.markdownit({
-    linkify: true,
     typographer: true,
     breaks: true,
-});
+}).enable('image');
 
+let mde = new SimpleMDE({ element: document.getElementById("wikiEditor") });
 
 if (!firebase.apps.length) {
     firebase.initializeApp(config);
@@ -43,14 +43,28 @@ let markers = [];
 let locationPerm;
 let qsDef;
 let animals;
-let wikiFeed = false;
+let wikiTemp = `## Image 
+...
+## Description
+...
+## Size
+...
+## Traits
+...
+## Behavior
+...
+## Habitat
+...
+## Endangered
+...
+`;
 
-fetch('/src/animals.json')
+fetch('/src/data.json')
   .then(function(response) {
     return response.json();
   })
-  .then(function(animalsJSON) {
-    animals = animalsJSON.english;
+  .then(function(JSON) {
+    animals = JSON.english;
 });
 
 
@@ -773,35 +787,46 @@ function navWiki() {
     $('#comWiki').show();
     $('#comID').hide();
 
+    $('#makeWikiBtn').show();
+    $('#makeWiki').hide();
+    $('#wikiEditorDiv').hide();
+    $('#searchWikis').show();
+    $('#wikiFeed').show();
+
     $('#navQ').removeClass('is-active');
     $('#navW').addClass('is-active');
-    $('#navID').removeClass('is-active');   
-    if(wikiFeed==false) {
-        wRef.orderBy("timestamp","desc").limit(3).get().then((snap)=>{
-            snap.forEach((doc)=>{
-                let animal = doc.data().animal;
-                let inmd = doc.data().md;
-                let md = inmd.substr(0,250);
-                let mdHTML = mdit.render(md);
-                let html = `
-                <div class="card mt">
-                    <header class="card-header">
-                        <p class="card-header-title">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
-                    </header>
-                    <div class="card-content">
-                        <div class="content">
-                            ${mdHTML}
-                        </div>
+    $('#navID').removeClass('is-active'); 
+    
+    $('#searchWikiInp').autocomplete({
+        source: animals,
+        delay: 200,
+    });
+    $('#wikiFeed').html("");
+    wRef.orderBy("timestamp","desc").limit(3).get().then((snap)=>{
+        snap.forEach((doc)=>{
+            let animal = doc.data().animal;
+            let inmd = doc.data().md;
+            let md = inmd.substr(0,125);
+            let mdHTML = mdit.render(md);
+            let html = `
+            <div class="card mt">
+                <header class="card-header">
+                    <p class="card-header-title">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        ${mdHTML}
                     </div>
                 </div>
-                `;
-                let oldHTML = $('#wikiFeed').html();
-                $('#wikiFeed').html(oldHTML+html);
-            });
+                <div class="card-footer">
+                    <a class="card-footer-item" onclick="editWiki('${doc.id}')">Edit Wiki Page</a>
+                </div>
+            </div>
+            `;
+            let oldHTML = $('#wikiFeed').html();
+            $('#wikiFeed').html(oldHTML+html);
         });
-        wikiFeed=true;
-    }
-    
+    });
 }
 
 function navIDAnim() {
@@ -841,4 +866,58 @@ function syncQ() {
     qsDef = false;
     $('#qtb').html("");
     navQuestions();
+}
+
+function makeWiki() {
+    $('#makeWikiBtn').hide();
+    $('#makeWiki').show();
+    $('#wikiEditorDiv').hide();
+    $('#searchWikis').hide();
+    $('#wikiFeed').hide();
+
+    $('#newWikiAnim').autocomplete({
+        source: animals,
+        delay: 200,
+    });
+}
+
+function createWiki() {
+    let anim = $('#newWikiAnim').val();
+    anim = anim.toLowerCase();
+    let ts = Math.round((new Date()).getTime() / 1000);
+    if(anim!=undefined && anim!= "") {
+        wRef.add({
+            animal: anim,
+            timestamp: ts,
+            md: wikiTemp
+        }).then((docRef)=>{
+            editWiki(docRef.id,wikiTemp);
+        });
+    }
+}
+
+function editWiki(id,md="") {
+    $('#makeWikiBtn').hide();
+    $('#makeWiki').hide();
+    $('#wikiEditorDiv').show();
+    $('#searchWikis').hide();
+    $('#wikiFeed').hide();
+    $('#saveWiki').attr("onclick",`saveWiki('${id}')`);
+
+    if(md=="") {
+        wRef.doc(id).get().then((doc)=>{
+            mde.value(doc.data().md);
+        });
+    } else {
+        mde.value(md);
+    }
+}
+
+function saveWiki(id) {
+    let mdVal = mde.value();
+    wRef.doc(id).update({
+        md: mdVal
+    });
+    
+    navWiki();
 }
