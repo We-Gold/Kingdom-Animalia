@@ -447,7 +447,7 @@ $('#loginResForm').click(()=>{
 $('#signupResForm').click(()=>{
     let email = $('#signupEmail')[0].value;
     let pass = $('#signupPass')[0].value;
-    login(email,pass);
+    signup(email,pass);
 });
 
 function login(email,pass) {
