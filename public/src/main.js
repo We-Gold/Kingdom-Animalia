@@ -21,7 +21,12 @@ var mdit = window.markdownit({
     breaks: true,
 }).enable('image');
 
-let mde = new SimpleMDE({ element: document.getElementById("wikiEditor") });
+let mde = new SimpleMDE({ 
+    element: document.getElementById("wikiEditor"),
+    autosave: {
+		enabled: false
+	},
+});
 
 if (!firebase.apps.length) {
     firebase.initializeApp(config);
@@ -43,6 +48,7 @@ let markers = [];
 let locationPerm;
 let qsDef;
 let animals;
+let ranks;
 let wikiTemp = `## Image 
 ...
 ## Description
@@ -65,6 +71,7 @@ fetch('/src/data.json')
   })
   .then(function(JSON) {
     animals = JSON.english;
+    ranks = JSON.ranks;
 });
 
 
@@ -104,7 +111,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
                 dbKey = querySnapshot.docs[0].id;
                 $('#userIcon').attr('src',`src/img/icons/${querySnapshot.docs[0].data().icon}.jpeg`);
                 $('#userName').text(querySnapshot.docs[0].data().name);
-                $('#userRank').text(querySnapshot.docs[0].data().rank);
+                $('#userRank').text(rank[Math.floor(querySnapshot.docs[0].data().rank)]);
                 locationPerm = querySnapshot.docs[0].data().locationPerm;
                 if (querySnapshot.docs[0].data().locationPerm==false) {
                     $('#noGeo').show();
@@ -116,7 +123,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
                 let email = user.email.split("@");
                 let name = email[0];
                 let uid = user.uid;
-                let rank = "Amateur";
+                let rank = 0;
                 let iconNum = Math.floor(Math.random() * icons.length);
                 let icon = icons[iconNum];
                 usersRef.add({
@@ -628,6 +635,16 @@ $('#postAnimal').click(async function(){
                     timestamp: ts
                 });
             });
+            let r;
+            usersRef.doc(dbKey).get().then((doc)=>{
+                r=doc.data().rank+0.2;
+                if(!(r>ranks.length-1)) {
+                    usersRef.doc(dbKey).update({
+                        rank:r
+                    });
+                }
+            });
+            
 
             // Go to animal sighting
             navigate(document.getElementById('profileBtn'));

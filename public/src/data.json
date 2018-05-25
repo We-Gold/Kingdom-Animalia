@@ -825,5 +825,16 @@
         "Yak",
         "Zorilla",
         "Common Zorro"
+    ],
+    "ranks":[
+        "Amateur",
+        "Bacteria",
+        "Ant",
+        "Mouse",
+        "Capybara",
+        "Kangaroo",
+        "Gorilla",
+        "Elephant",
+        "Blue Whale"
     ]
 }
