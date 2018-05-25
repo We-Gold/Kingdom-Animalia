@@ -13,7 +13,7 @@ var config = {
     storageBucket: "animalia-a531b.appspot.com",
     messagingSenderId: "978722263260"
 };
-let icons = ['Bison','Dolphin','Eagle','Gorilla','Lobster','Monkey','Cow','Deer','Duck','Rabbit','Spider','Wolf','Turkey','Lion','Pig','Snake','Shark','Bear','Fish','Chicken','Horse','Cat','Dog'];
+let icons = ['bison','dolphin','eagle','gorilla','lobster','monkey','cow','deer','duck','rabbit','spider','wolf','turkey','lion','pig','snake','shark','bear','fish','chicken','horse','cat','dog'];
 let rank = ['Amateur','Bacteria','Ant','Mouse','Capybara','Kangaroo','Gorilla','Elephant','Blue Whale'];
 
 var mdit = window.markdownit({
@@ -168,7 +168,7 @@ function toUpper(str) {
 function editProfile() {
     let html = "";
     for (let i=0; i<icons.length; i++) {
-        html += `<option value="${icons[i].toLowerCase()}" style="background-image:url('src/img/icons/${icons[i].toLowerCase()}.jpeg');">${icons[i]}</option>`;
+        html += `<option value="${icons[i].toLowerCase()}" style="background-image:url('src/img/icons/${icons[i].toLowerCase()}.jpeg');">${toUpper(icons[i])}</option>`;
     }
     $('#newIcon').html(html);
     let icon = $('#userIcon').attr("src");
@@ -187,7 +187,7 @@ function hideEdit() {
 }
 function saveProfile() {
     let icon_o = $('#newIcon').val();
-    let icon = toUpper($('#newIcon').val());
+    let icon = $('#newIcon').val();
     let name = $('#newName').val();
     usersRef.doc(dbKey).update({
         name:name,
