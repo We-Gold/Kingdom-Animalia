@@ -598,7 +598,7 @@ $('#animalOp').change(()=>{
     }
 });
 
-$('#postAnimal').click(async function(){
+$('#postAnimal').click(function(){
     let canvas = document.getElementById('frameCanvas');
     let image = dataURItoBlob(canvas.toDataURL("image/jpeg"));
     let fileName = `${firUser.uid}-${Math.round((new Date()).getTime() / 1000)}`;
@@ -627,7 +627,7 @@ $('#postAnimal').click(async function(){
     let imageRef = storage.child(`images/${fileName}`);
 
     let task = imageRef.put(image);
-    await task.on('state_changed',
+    task.on('state_changed',
         function progress(snapshot) {
             $('#uploadProgress').show();
             let percent = (snapshot.bytesTransferred/snapshot.totalBytes) *100;
