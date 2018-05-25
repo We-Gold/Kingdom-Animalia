@@ -302,7 +302,15 @@
                             <strong>You have blocked our access to your location.</strong><br>
                             Your location is required for you to take photos and see animals. <br>
                             Follow the instructions below<br>
-                            <img src="src/img/activate-location.png">
+                            <select id="deviceBlocked">
+                                <option value="ios">iOS</option>
+                                <option value="android">Android</option>
+                                <option value="computer">Computer</option>
+                            </select>
+                            <img id="computerG" style="display: none;" src="src/img/activate-location.png">
+                            <img id="iosG" src="src/img/ios-activate-location.jpeg">
+                            <!-- Replace when android settings are suggested-->
+                            <p id="androidG" style="display: none;">No guide is currently available.</p>
                         </div>
                     </div>
                 </div>

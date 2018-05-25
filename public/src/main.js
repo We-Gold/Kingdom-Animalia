@@ -411,6 +411,23 @@ $('#searchAnimBtn').click(()=>{
     showAnimalMarkers();
 });
 
+$('#deviceBlocked').change(()=>{
+    let newVal = $('#deviceBlocked').val();
+    if(newVal=="ios") {
+        $('#iosG').show();
+        $('#androidG').hide();
+        $('#computerG').hide();
+    } else if(newVal=="android") {
+        $('#iosG').hide();
+        $('#androidG').show();
+        $('#computerG').hide();
+    } else if(newVal=="computer") {
+        $('#iosG').hide();
+        $('#androidG').hide();
+        $('#computerG').show();
+    }
+});
+
 $('#toggleAuth').click(()=>{
     $('#loginForm').toggle();
     $('#signupForm').toggle();
