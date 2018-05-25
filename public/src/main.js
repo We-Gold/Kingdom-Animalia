@@ -809,6 +809,7 @@ function navWiki() {
     $('#wikiEditorDiv').hide();
     $('#searchWikis').show();
     $('#wikiFeed').show();
+    $('#wikiSearch').hide();
 
     $('#navQ').removeClass('is-active');
     $('#navW').addClass('is-active');
@@ -890,6 +891,7 @@ function makeWiki() {
     $('#makeWiki').show();
     $('#wikiEditorDiv').hide();
     $('#searchWikis').hide();
+    $('#wikiSearch').hide();
     $('#wikiFeed').hide();
 
     $('#newWikiAnim').autocomplete({
@@ -903,12 +905,18 @@ function createWiki() {
     anim = anim.toLowerCase();
     let ts = Math.round((new Date()).getTime() / 1000);
     if(anim!=undefined && anim!= "") {
-        wRef.add({
-            animal: anim,
-            timestamp: ts,
-            md: wikiTemp
-        }).then((docRef)=>{
-            editWiki(docRef.id,wikiTemp);
+        wRef.where("animal","==",anim).get().then((snap)=>{
+            if(snap.docs.length>0) {
+                editWiki(snap.docs[0].id);
+            } else {
+                wRef.add({
+                    animal: anim,
+                    timestamp: ts,
+                    md: wikiTemp
+                }).then((docRef)=>{
+                    editWiki(docRef.id,wikiTemp);
+                }); 
+            }
         });
     }
 }
@@ -918,6 +926,7 @@ function editWiki(id,md="") {
     $('#makeWiki').hide();
     $('#wikiEditorDiv').show();
     $('#searchWikis').hide();
+    $('#wikiSearch').hide();
     $('#wikiFeed').hide();
     $('#saveWiki').attr("onclick",`saveWiki('${id}')`);
 
@@ -937,4 +946,40 @@ function saveWiki(id) {
     });
     
     navWiki();
+}
+
+function searchWikis() {
+    let term = $('#searchWikiInp').val().toLowerCase();
+
+    $('#makeWikiBtn').hide();
+    $('#makeWiki').hide();
+    $('#wikiEditorDiv').hide();
+    $('#searchWikis').hide();
+    $('#wikiSearch').show();
+    $('#wikiFeed').hide();
+    $('#wikiSearch').html("");
+
+    wRef.where("animal","==",term).get().then((snap)=>{
+        snap.forEach((doc)=>{
+            let oldHTML = $('#wikiSearch').html();
+            let animal = doc.data().animal;
+            let mdHTML = mdit.render(doc.data().md);
+            let html = `
+            <div class="card mt">
+                <header class="card-header">
+                    <p class="card-header-title">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        ${mdHTML}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a class="card-footer-item" onclick="editWiki('${doc.id}')">Edit Wiki Page</a>
+                </div>
+            </div>
+            `;
+            $('#wikiSearch').html(oldHTML+html);
+        });
+    });
 }
