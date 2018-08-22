@@ -9,7 +9,7 @@
     z-index: 2000;
 }
 
-#login {
+#login{
     display: none;
 }
 
@@ -110,7 +110,7 @@ body{
     z-index: 10;
 }
 .buff {
-    height: 100px;
+    height: 200px;
 }
 #noGeo {
     display: none;
