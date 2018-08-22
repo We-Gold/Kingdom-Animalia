@@ -14,7 +14,7 @@ var config = {
     messagingSenderId: "978722263260"
 };
 let icons = ['bison','dolphin','eagle','gorilla','lobster','monkey','cow','deer','duck','rabbit','spider','wolf','turkey','lion','pig','snake','shark','bear','fish','chicken','horse','cat','dog'];
-let rank = ['Amateur','Bacteria','Ant','Mouse','Capybara','Kangaroo','Gorilla','Elephant','Blue Whale'];
+let rank = ['Amateur','Bacteria','Ant','Mouse','Capybara','Kangaroo','Gorilla','Elephant','Blue Whale','Zoologist'];
 
 var mdit = window.markdownit({
     typographer: true,
@@ -111,7 +111,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
                 dbKey = querySnapshot.docs[0].id;
                 $('#userIcon').attr('src',`src/img/icons/${querySnapshot.docs[0].data().icon}.jpeg`);
                 $('#userName').text(querySnapshot.docs[0].data().name);
-                $('#userRank').text(rank[Math.floor(querySnapshot.docs[0].data().rank)]);
+                $('#userRank').text(`${(querySnapshot.docs[0].data().rank)/0.2} Sightings: ${rank[Math.floor(querySnapshot.docs[0].data().rank)]}`);
                 locationPerm = querySnapshot.docs[0].data().locationPerm;
                 if (querySnapshot.docs[0].data().locationPerm==false) {
                     $('#noGeo').show();
@@ -654,11 +654,13 @@ $('#postAnimal').click(function(){
             });
             let r;
             usersRef.doc(dbKey).get().then((doc)=>{
-                r=doc.data().rank+0.2;
-                if(!(r>ranks.length-1)) {
-                    usersRef.doc(dbKey).update({
-                        rank:r
-                    });
+                if(doc.data().rank<9){
+                    r=doc.data().rank+0.2;
+                    if(!(r>ranks.length-1)) {
+                        usersRef.doc(dbKey).update({
+                            rank:r
+                        });
+                    }
                 }
             });
             
