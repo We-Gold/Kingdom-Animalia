@@ -631,7 +631,7 @@ $('#postAnimal').click(function(){
         function progress(snapshot) {
             $('#uploadProgress').show();
             let percent = (snapshot.bytesTransferred/snapshot.totalBytes) *100;
-            $('#uploadProgress').val('"'+percent+'"');
+            $('#uploadProgress').val(percent);
         },
         function error(err) {
             console.log(err.code);
