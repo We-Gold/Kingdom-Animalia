@@ -43,25 +43,26 @@ let wRef = db.collection('wikis');
 let dbKey;
 let firUser;
 let mapLayer;
+let homeLimit = 10;
 let pMap;
 let markers = [];
 let locationPerm;
 let qsDef;
 let animals;
 let ranks;
-let wikiTemp = `## Image 
+let wikiTemp = `## **Image**  
 ...
-## Description
+## **Description**  
 ...
-## Size
+## **Size**  
 ...
-## Traits
+## **Traits**  
 ...
-## Behavior
+## **Behavior**  
 ...
-## Habitat
+## **Habitat**  
 ...
-## Endangered
+## **Endangered**  
 ...
 `;
 
@@ -111,7 +112,11 @@ firebase.auth().onAuthStateChanged(async function(user) {
                 dbKey = querySnapshot.docs[0].id;
                 $('#userIcon').attr('src',`src/img/icons/${querySnapshot.docs[0].data().icon}.jpeg`);
                 $('#userName').text(querySnapshot.docs[0].data().name);
-                $('#userRank').text(`${(querySnapshot.docs[0].data().rank)/0.2} Sightings: ${rank[Math.floor(querySnapshot.docs[0].data().rank)]}`);
+                if ((querySnapshot.docs[0].data().rank)>9){
+                    $('#userRank').text(`${9/0.2} Sightings: ${rank[Math.floor(querySnapshot.docs[0].data().rank)]}`);
+                } else {
+                    $('#userRank').text(`${Math.round((querySnapshot.docs[0].data().rank)/0.2)} Sightings: ${rank[Math.floor(querySnapshot.docs[0].data().rank)]}`);
+                }
                 locationPerm = querySnapshot.docs[0].data().locationPerm;
                 if (querySnapshot.docs[0].data().locationPerm==false) {
                     $('#noGeo').show();
@@ -208,12 +213,19 @@ function navigate(el) {
     stopVideo()
     if (el.id=="homeBtn") {
         $('#home').show();
+        homeLimit = 10;
         clearHomeFeed();
         updateHomeFeed();
         $('#camera').hide();
         $('#search').hide();
         $('#community').hide();
         $('#profile').hide();
+        let $win = $(window);
+        $win.scroll(function () {
+            if (($win.height() + $win.scrollTop() == $(document).height()) && $('#home').is(':visible')) {
+                loadMoreHome();
+            }
+        });
     }
     else if (el.id=="cameraBtn") {
         $('#latPick').val(0);
@@ -247,6 +259,7 @@ function navigate(el) {
         $('#community').hide();
         $('#profile').hide();
         updateSearchMap();
+        showRecentAnimals();
     }
     else if (el.id=="communityBtn"){
         $('#home').hide();
@@ -271,28 +284,116 @@ function navigate(el) {
     }
 }
 
-function sightingCode(uid,coords,url,animal, size="2",know,key) {
-    /*let userName = "";
-    usersRef.where("uid", "==", uid).get().then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-            userName = doc.data().name;
+function capitalizeEachWord(str) {
+    return str.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+}
+
+function sightingCode(uid,coords,url,animal,newSize,know,key,likeCount) {
+    let newCoords = [];
+    newCoords[0] = (coords[0].substr(0,1)=="-"?coords[0].substr(0,8):coords[0].substr(0,7));
+    newCoords[1] = (coords[1].substr(0,1)=="-"?coords[1].substr(0,8):coords[1].substr(0,7));
+    let removeBtn = `<button class="button is-danger is-small" onclick="removeSighting('${key}')">Delete Sighting</button>`;
+    let userNameCode = "";
+    let size = newSize;
+
+    let htmlS = `
+    <div>
+        <p class="title${(size=="2"?"":" is-6")}">${capitalizeEachWord(animal)}</p>
+        <img class="sightImg" src="${url}"${(size="2"?"":" width='50px'")}>
+        <p class="${(size=="1"?"-m":"mt")}"><span id="like-${key}-${size}"  class="${($('#home').is(':visible'))?"":"hide"}" class="fas fa-thumbs-up fa-xs ${localStorage.getItem(key)=="liked"?"fabtn":""}" onclick="like('${key}','${size}')"></span> <span id="likeC-${key}-${size}" class="${($('#home').is(':visible'))?"":"hide"}">${likeCount} | </span>${newCoords[0]}, ${newCoords[1]}</p>
+        <span id="user-${size}-${key}"></span>
+        ${(uid==firUser.uid)?removeBtn:""}
+    </div>
+    `;
+    usersRef.where("uid", "==", uid).get().then(async function(querySnapshot) {
+        await querySnapshot.forEach(function(doc) {
+            if($(`#user-${size}-${key}`).length){
+                $(`#user-${size}-${key}`).html(`<p class="-m${(size=="2"?"":" is-6")}">By ${doc.data().name} (${rank[Math.floor(doc.data().rank)]})</p>`);
+                if(localStorage.getItem(key)=="liked") {
+                    $(`#like-${key}-${size}`).attr("onclick",`dislike('${key}','${size}')`);
+                } else {
+                    $(`#like-${key}-${size}`).attr("onclick",`like('${key}','${size}')`);
+                }
+            } else {
+                $(document).arrive(`#user-${size}-${key}`, function() {
+                    $(`#user-${size}-${key}`).html(`<p class="-m${(size=="2"?"":" is-6")}">By ${doc.data().name} (${rank[Math.floor(doc.data().rank)]})</p>`);
+                    if(localStorage.getItem(key)=="liked") {
+                        $(`#like-${key}-${size}`).attr("onclick",`dislike('${key}','${size}')`);
+                    } else {
+                        $(`#like-${key}-${size}`).attr("onclick",`like('${key}','${size}')`);
+                    }
+                });
+            }
+            
         });
     }) 
     .catch(function(error) {
         console.log("Error getting documents: ", error);
-    });*/
-    let newCoords = [];
-    newCoords[0] = (coords[0].substr(0,1)=="-"?coords[0].substr(0,8):coords[0].substr(0,7));
-    newCoords[1] = (coords[1].substr(0,1)=="-"?coords[1].substr(0,8):coords[1].substr(0,7));
-    return `
-        <div>
-            <p class="title${(size=="2"?"":" is-6")}">${animal.charAt(0).toUpperCase()+animal.substr(1)}</p>
-            <img class="sightImg" src="${url}"${(size="2"?"":" width='50px'")}>
-        <p class="${(size=="1"?"-m":"mt")}">${newCoords[0]}, ${newCoords[1]}</p>
-        </div>
-    `;
-    // <p class="-m${(size=="2"?"":" is-6")}">By ${userName}</p>
+    }); 
 
+    return htmlS;
+
+}
+
+function like(key,size) {
+
+    dbImageRef.doc(key).get().then((doc)=>{
+        let newLikes = doc.data().likes;
+        //if(this.like){
+        newLikes=newLikes+1;
+        //} else if(!(this.like)){
+         //   likes-=1;
+        //}
+        dbImageRef.doc(key).update({
+            likes:newLikes
+        });
+    });
+    localStorage.setItem(key,"liked");
+    $(`#like-${key}-${size}`).attr("onclick",`dislike('${key}','${size}')`);
+    $(`#like-${key}-${size}`).addClass("fabtn");
+    let t = $(`#likeC-${key}-${size}`).text();
+    t = parseInt(t);
+    $(`#likeC-${key}-${size}`).text(t+1);
+}
+
+function dislike(key,size){
+    
+    dbImageRef.doc(key).get().then((doc)=>{
+        let newLikes = doc.data().likes;
+        //if(this.like){
+        newLikes=newLikes-1;
+        //} else if(!(this.like)){
+         //   likes-=1;
+        //}
+        dbImageRef.doc(key).update({
+            likes:newLikes
+        });
+    });
+    localStorage.setItem(key,"disliked");
+    $(`#like-${key}-${size}`).attr("onclick",`like('${key}','${size}')`);
+    $(`#like-${key}-${size}`).removeClass("fabtn");
+    let t = $(`#likeC-${key}-${size}`).text();
+    t = parseInt(t);
+    $(`#likeC-${key}-${size}`).text(t-1);
+}
+
+function removeSighting(key) {
+    dbImageRef.doc(key).delete().then(function() {
+        $(`#${key}`).remove();
+    }).catch(function(error) {
+        console.log(error);
+    });
+
+    usersRef.doc(dbKey).get().then((doc)=>{
+        r=doc.data().rank-0.2;
+        if(!(r>ranks.length-1)) {
+            usersRef.doc(dbKey).update({
+                rank:r
+            });
+        }
+    });
 }
 
 async function updateProfMap() {
@@ -311,7 +412,7 @@ async function updateProfMap() {
             }
             dbImageRef.where("user", "==", firUser.uid).get().then( function(querySnapshot) {
                 querySnapshot.forEach(async function(doc) {
-                    let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
+                    let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.id,doc.data().likes);
 
                     let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
                     .bindPopup(popup);
@@ -375,11 +476,31 @@ async function updateSearchMap() {
 
 async function showAnimalMarkers() {
     if ($('#search').is(':visible')) {
+        updateSearchMap();
         let searchAnimal = $('#searchAnimInp').val();
         searchAnimal = searchAnimal.toLowerCase();
         await dbImageRef.where('animal','==',searchAnimal).get().then(function(snap){
             snap.forEach(async function(doc){
-                let popup = await sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.key);
+                let popup = await sightingCode(doc.data().user,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.id,doc.data().likes);
+
+                let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
+                .bindPopup(popup);
+
+                markers.push(marker);
+            });
+        });
+
+        let mArr = new L.featureGroup(markers);
+        pMap.fitBounds(mArr.getBounds());
+        pMap.setZoom(2);
+    }
+}
+
+async function showRecentAnimals() {
+    if ($('#search').is(':visible')) {
+        await dbImageRef.orderBy("timestamp","desc").limit(10).get().then(function(snap){
+            snap.forEach(async function(doc){
+                let popup = await sightingCode(doc.data().user,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"1",doc.data().know,doc.id,doc.data().likes);
 
                 let marker = L.marker([doc.data().coords[0], doc.data().coords[1]]).addTo(pMap)
                 .bindPopup(popup);
@@ -564,8 +685,27 @@ $('#imagePick').on('change',(e)=>{
     canvas.renderImage(image);
     $('#imageTaken').show();
     let coords = JSON.parse(localStorage.getItem('coords'));
-    $('#latPick').val(coords[0]);
-    $('#longPick').val(coords[1]);
+    EXIF.getData(image, function(){
+        let lat = EXIF.getTag(this, "GPSLatitude");
+        let latRef = EXIF.getTag(this, "GPSLatitudeRef");
+        lat = lat[0] + (lat[1]/60) + (lat[2]/3600);
+        if (latRef=="S") {
+            lat = -1*lat;
+        }
+        let long = EXIF.getTag(this, "GPSLongitude");
+        let longRef = EXIF.getTag(this, "GPSLongitudeRef");
+        long = long[0] + (long[1]/60) + (long[2]/3600);
+        if (longRef=="W") {
+            long = -1*long;
+        }
+        if(lat && long){
+            $('#latPick').val(lat);
+            $('#longPick').val(long);
+        } else {
+            $('#latPick').val(coords[0]);
+            $('#longPick').val(coords[1]);
+        }
+    });
 });
 
 function stopVideo() {
@@ -605,6 +745,7 @@ $('#postAnimal').click(function(){
     let coords = [$('#latPick').val(),$('#longPick').val()];
     let animalOption = $('#animalOp').val();
     let know = false;
+    let likes = 0;
     let animal;
     let userID = firUser.uid;
     let ts = Math.round((new Date()).getTime() / 1000);
@@ -630,7 +771,7 @@ $('#postAnimal').click(function(){
     task.on('state_changed',
         function progress(snapshot) {
             $('#uploadProgress').show();
-            let percent = (snapshot.bytesTransferred/snapshot.totalBytes) *100;
+            let percent = 50;
             $('#uploadProgress').val(percent);
         },
         function error(err) {
@@ -649,18 +790,17 @@ $('#postAnimal').click(function(){
                     coords:coords,
                     know:know,
                     animal:newAnimal,
-                    timestamp: ts
+                    timestamp: ts,
+                    likes:likes
                 });
             });
             let r;
             usersRef.doc(dbKey).get().then((doc)=>{
-                if(doc.data().rank<9){
-                    r=doc.data().rank+0.2;
-                    if(!(r>ranks.length-1)) {
-                        usersRef.doc(dbKey).update({
-                            rank:r
-                        });
-                    }
+                r=doc.data().rank+0.2;
+                if(!(r>ranks.length-1)) {
+                    usersRef.doc(dbKey).update({
+                        rank:r
+                    });
                 }
             });
             
@@ -681,6 +821,14 @@ function showModal() {
 
 function closeModal() {
     $('#modal').removeClass('is-active');
+}
+
+function showWikiModal() {
+    $('#wikiModal').addClass('is-active');
+}
+
+function closeWikiModal() {
+    $('#wikiModal').removeClass('is-active');
 }
 
 function changeName(id,url) {
@@ -706,12 +854,12 @@ function saveNewSpecies(id) {
 
 function updateHomeFeed() {
     if($('#home').is(':visible')){
-        dbImageRef.orderBy("timestamp","desc").limit(10).get().then(function(snap){
+        dbImageRef.orderBy("timestamp","desc").limit(homeLimit).get().then(function(snap){
             snap.forEach(function(doc){
                 let item = `
-                <div class="card mt">
+                <div class="card mt" id="${doc.id}">
                     <div class="card-content">
-                        ${sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.key)}
+                        ${sightingCode(doc.data().user,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.id,doc.data().likes)}
                     </div>
                     <div class="card-footer">
                         <a class="card-footer-item ${(doc.data().animal==""?"":"hide")}" onclick="changeName('${doc.id}','${doc.data().imageURL}')">Identify Animal</a>
@@ -724,15 +872,44 @@ function updateHomeFeed() {
     }
 }
 
+function loadMoreHome(){
+    homeLimit+=10;
+    if($('#home').is(':visible')){
+        dbImageRef.orderBy("timestamp","desc").limit(homeLimit).get().then(function(snap){
+            let count = 0;
+            snap.forEach(function(doc){
+                if(count>=homeLimit-10){
+                    
+                    let item = `
+                    <div class="card mt" id="${doc.id}">
+                        <div class="card-content">
+                            ${sightingCode(doc.data().user,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.id,doc.data().likes)}
+                        </div>
+                        <div class="card-footer">
+                            <a class="card-footer-item ${(doc.data().animal==""?"":"hide")}" onclick="changeName('${doc.id}','${doc.data().imageURL}')">Identify Animal</a>
+                        </div>
+                    </div>`;
+                    document.getElementById('feed').innerHTML += item;
+                    //<a class="card-footer-item">Suggest Change</a>
+                }
+                count+=1;
+            });
+        });
+    }
+}
+
 function updateIDAnim() {
     if($('#comID').is(':visible')){
-        document.getElementById('comID').innerHTML = "There are no unidentified animals.";
         dbImageRef.where("know","==",false).limit(10).get().then(function(snap){
+            document.getElementById('comID').innerHTML = "";
+            if (snap.docs && !(snap.docs.length>0)){
+                document.getElementById('comID').innerHTML = "There are no unidentified animals.";
+            }
             snap.forEach(function(doc){
                 let item = `
                 <div class="card mt">
                     <div class="card-content">
-                        ${sightingCode(firUser.uid,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.key)}
+                        ${sightingCode(doc.data().user,doc.data().coords,doc.data().imageURL,(doc.data().animal==""?"Unknown Animal":doc.data().animal),"2",doc.data().know,doc.id,doc.data().likes)}
                     </div>
                     <div class="card-footer">
                         <a class="card-footer-item ${(doc.data().animal==""?"":"hide")}" onclick="changeName('${doc.id}','${doc.data().imageURL}')">Identify Animal</a>
@@ -807,15 +984,17 @@ function showQuestion(id) {
 }
 
 async function respondQ(id) {
-    await qRef.doc(id).get().then((doc)=>{
-        let oldRes = doc.data().responses;
-        oldRes.push($('#'+id).val());
-        qRef.doc(id).update({
-            responses: oldRes
+    if (!($('#'+id).val()=="")){
+        await qRef.doc(id).get().then((doc)=>{
+            let oldRes = doc.data().responses;
+            oldRes.push($('#'+id).val());
+            qRef.doc(id).update({
+                responses: oldRes
+            });
         });
-    });
-    // Respond
-    showQuestion(id);
+        // Respond
+        showQuestion(id);
+    }
 }
 
 function navWiki() {
@@ -843,8 +1022,8 @@ function navWiki() {
         snap.forEach((doc)=>{
             let animal = doc.data().animal;
             let inmd = doc.data().md;
-            let md = inmd.substr(0,125);
-            let mdHTML = mdit.render(md);
+            let md = inmd.split("## **Description**");
+            let mdHTML = mdit.render(md[0]);
             let html = `
             <div class="card mt">
                 <header class="card-header">
@@ -856,6 +1035,7 @@ function navWiki() {
                     </div>
                 </div>
                 <div class="card-footer">
+                    <a class="card-footer-item" onclick="viewWiki('${animal.charAt(0).toUpperCase()+animal.substr(1)}','${doc.id}')">View Wiki</a>
                     <a class="card-footer-item" onclick="editWiki('${doc.id}')">Edit Wiki Page</a>
                 </div>
             </div>
@@ -958,6 +1138,14 @@ function editWiki(id,md="") {
     }
 }
 
+function viewWiki(animName,docid) {
+    $('#wikiModalTitle').text(animName);
+    wRef.doc(docid).get().then((doc)=>{
+        $('#wiki-modal-content').html(mdit.render(doc.data().md));
+        showWikiModal();
+    });
+}
+
 function saveWiki(id) {
     let mdVal = mde.value();
     wRef.doc(id).update({
@@ -994,6 +1182,7 @@ function searchWikis() {
                     </div>
                 </div>
                 <div class="card-footer">
+                    <a class="card-footer-item" onclick="viewWiki('${animal.charAt(0).toUpperCase()+animal.substr(1)}','${doc.id}')">View Wiki</a>
                     <a class="card-footer-item" onclick="editWiki('${doc.id}')">Edit Wiki Page</a>
                 </div>
             </div>

@@ -43,7 +43,11 @@
 
 body{
     margin: 0;
-    background-color: #f9f9f9;
+}
+html{
+    background-image: url('./img/background.jpg');
+    background-repeat: repeat-y;
+    background-attachment: fixed;
 }
 
 .is-fluid {
@@ -127,7 +131,7 @@ body{
 }
 
 #pMap {
-    height: 240px;
+    height: 340px;
     min-width: 100%;
 }
 
@@ -234,4 +238,8 @@ h6 { font-size: .75em; }
 
 #wikiEditorDiv, #makeWiki{
     display: none;
+}
+
+.card-content {
+    padding: 1rem;
 }
